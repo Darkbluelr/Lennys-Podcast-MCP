@@ -1,0 +1,24 @@
+{
+  "name": "lennys-podcast-mcp",
+  "version": "1.0.0",
+  "description": "MCP Server for searching Lenny's Podcast transcripts",
+  "type": "module",
+  "main": "build/index.js",
+  "bin": {
+    "lennys-podcast-mcp": "build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/index.js",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "gray-matter": "^4.0.3",
+    "glob": "^11.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}
