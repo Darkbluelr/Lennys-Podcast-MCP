@@ -2,8 +2,6 @@
 
 将 [Lenny's Podcast](https://www.lennyspodcast.com/) 的 303 期转录稿变成 AI 可按需检索的知识库。通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) 协议，让 Claude Code、Codex 等 AI 编程工具在对话中自动引用播客内容。
 
-**自包含项目** — 转录稿数据已内置，克隆即可使用，无需依赖外部仓库。
-
 ## 功能
 
 ### 基础工具
@@ -62,7 +60,6 @@ BATCH_SIZE=5 MAX_EPISODES=10 ANTHROPIC_API_KEY=sk-... npm run build:knowledge
 
 - 脚本幂等：已处理的节目会自动跳过
 - 每批次自动保存，中断后可继续
-- 预估成本：~$3-5（一次性处理全部 303 期）
 - 输出文件：`data/knowledge.json`
 
 ## 配置
