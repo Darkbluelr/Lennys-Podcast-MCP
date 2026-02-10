@@ -2,6 +2,8 @@
 
 将 [Lenny's Podcast](https://www.lennyspodcast.com/) 的 303 期转录稿变成 AI 可按需检索的知识库。通过 [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) 协议，让 Claude Code、Codex 等 AI 编程工具在对话中自动引用播客内容。
 
+**自包含项目** — 转录稿数据已内置，克隆即可使用，无需依赖外部仓库。
+
 ## 功能
 
 ### 基础工具
@@ -33,19 +35,15 @@
 ## 前置条件
 
 - Node.js >= 18
-- [lennys-podcast-transcripts](https://github.com/chatprd/lennys-podcast-transcripts) 仓库（转录稿数据源）
 
 ## 安装
 
 ```bash
-# 1. 克隆转录稿仓库（如果还没有）
-git clone https://github.com/chatprd/lennys-podcast-transcripts.git
-cd lennys-podcast-transcripts
+# 1. 克隆本仓库
+git clone https://github.com/Darkbluelr/Lennys-Podcast-MCP.git
+cd Lennys-Podcast-MCP
 
-# 2. 进入 MCP Server 目录
-cd mcp-server
-
-# 3. 安装依赖并构建
+# 2. 安装依赖并构建
 npm install
 npm run build
 ```
@@ -76,8 +74,7 @@ BATCH_SIZE=5 MAX_EPISODES=10 ANTHROPIC_API_KEY=sk-... npm run build:knowledge
 claude mcp add lennys-podcast \
   --scope user \
   --transport stdio \
-  -e LENNYS_REPO_ROOT=/你的路径/lennys-podcast-transcripts \
-  -- node /你的路径/lennys-podcast-transcripts/mcp-server/build/index.js
+  -- node /你的路径/Lennys-Podcast-MCP/build/index.js
 ```
 
 或手动编辑 `~/.claude.json`，在 `mcpServers` 中添加：
@@ -86,10 +83,7 @@ claude mcp add lennys-podcast \
 {
   "lennys-podcast": {
     "command": "node",
-    "args": ["/你的路径/lennys-podcast-transcripts/mcp-server/build/index.js"],
-    "env": {
-      "LENNYS_REPO_ROOT": "/你的路径/lennys-podcast-transcripts"
-    }
+    "args": ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
   }
 }
 ```
@@ -101,10 +95,7 @@ claude mcp add lennys-podcast \
   "mcpServers": {
     "lennys-podcast": {
       "command": "node",
-      "args": ["/你的路径/lennys-podcast-transcripts/mcp-server/build/index.js"],
-      "env": {
-        "LENNYS_REPO_ROOT": "/你的路径/lennys-podcast-transcripts"
-      }
+      "args": ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
     }
   }
 }
@@ -118,10 +109,7 @@ claude mcp add lennys-podcast \
 [mcp_servers.lennys-podcast]
 type = "stdio"
 command = "node"
-args = ["/你的路径/lennys-podcast-transcripts/mcp-server/build/index.js"]
-
-[mcp_servers.lennys-podcast.env]
-LENNYS_REPO_ROOT = "/你的路径/lennys-podcast-transcripts"
+args = ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
 ```
 
 ### Claude Desktop
@@ -133,23 +121,37 @@ LENNYS_REPO_ROOT = "/你的路径/lennys-podcast-transcripts"
   "mcpServers": {
     "lennys-podcast": {
       "command": "node",
-      "args": ["/你的路径/lennys-podcast-transcripts/mcp-server/build/index.js"],
-      "env": {
-        "LENNYS_REPO_ROOT": "/你的路径/lennys-podcast-transcripts"
-      }
+      "args": ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
     }
   }
 }
 ```
 
-> 所有配置中的 `/你的路径/` 替换为实际的绝对路径。
+> 所有配置中的 `/你的路径/` 替换为实际的绝对路径。不再需要设置 `LENNYS_REPO_ROOT` 环境变量。
 
-## 环境变量
+## 项目结构
 
-| 变量 | 说明 | 默认值 |
-|------|------|--------|
-| `LENNYS_REPO_ROOT` | 转录稿仓库根目录的绝对路径 | MCP Server 上两级目录 |
-| `ANTHROPIC_API_KEY` | Claude API 密钥（仅构建知识层时需要） | 无 |
+```
+├── episodes/           # 303 期转录稿（YAML frontmatter + 对话内容）
+│   └── {guest-name}/
+│       └── transcript.md
+├── index/              # 87 个话题索引
+│   └── {topic}.md
+├── src/                # MCP Server 源码
+│   ├── index.ts        # 入口 + 10 个工具注册
+│   ├── bm25.ts         # BM25 搜索引擎
+│   ├── data.ts         # 数据加载 + 知识层
+│   ├── search.ts       # 片段提取
+│   ├── advice.ts       # get_advice 逻辑
+│   ├── perspectives.ts # compare_perspectives 逻辑
+│   ├── insights.ts     # guest_expertise + episode_insights 逻辑
+│   ├── knowledge-types.ts # 知识层类型
+│   └── types.ts        # 核心类型
+├── scripts/
+│   └── build-knowledge.ts  # 知识层构建脚本
+└── data/
+    └── knowledge.json  # 预计算知识（可选，需构建）
+```
 
 ## 使用示例
 
@@ -178,6 +180,10 @@ ANTHROPIC_API_KEY=sk-... npm run build:knowledge
 # 启动（通常由 AI 工具自动启动，无需手动运行）
 npm start
 ```
+
+## 数据来源
+
+转录稿数据来自 [chatprd/lennys-podcast-transcripts](https://github.com/chatprd/lennys-podcast-transcripts)。
 
 ## 技术栈
 

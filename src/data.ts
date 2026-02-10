@@ -139,7 +139,7 @@ export class DataStore {
   // --- 知识层（可选，优雅降级）---
 
   private loadKnowledge(): void {
-    const knowledgePath = join(this.repoRoot, "mcp-server", "data", "knowledge.json");
+    const knowledgePath = join(this.repoRoot, "data", "knowledge.json");
     if (!existsSync(knowledgePath)) return;
     try {
       const raw = readFileSync(knowledgePath, "utf-8");

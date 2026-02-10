@@ -53,7 +53,7 @@ interface KnowledgeBase {
 }
 
 const SCRIPT_DIR = import.meta.dirname ?? new URL(".", import.meta.url).pathname;
-const REPO_ROOT = process.env.LENNYS_REPO_ROOT ?? join(SCRIPT_DIR, "../../");
+const REPO_ROOT = process.env.LENNYS_REPO_ROOT ?? join(SCRIPT_DIR, "../");
 const BATCH_SIZE = parseInt(process.env.BATCH_SIZE ?? "3", 10);
 const MAX_EPISODES = process.env.MAX_EPISODES ? parseInt(process.env.MAX_EPISODES, 10) : Infinity;
 const OUTPUT_PATH = join(SCRIPT_DIR, "../data/knowledge.json");

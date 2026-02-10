@@ -12,7 +12,7 @@ import { comparePerspectives } from "./perspectives.js";
 import { getGuestExpertise, getEpisodeInsights } from "./insights.js";
 import type { EpisodeMeta } from "./types.js";
 
-const REPO_ROOT = process.env.LENNYS_REPO_ROOT ?? new URL("../../", import.meta.url).pathname;
+const REPO_ROOT = process.env.LENNYS_REPO_ROOT ?? new URL("../", import.meta.url).pathname;
 
 function formatEpisodeMeta(ep: EpisodeMeta): string {
   return [
