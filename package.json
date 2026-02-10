@@ -1,7 +1,7 @@
 {
   "name": "lennys-podcast-mcp",
-  "version": "1.0.0",
-  "description": "MCP Server for searching Lenny's Podcast transcripts",
+  "version": "2.0.0",
+  "description": "MCP Server for searching Lenny's Podcast transcripts — BM25 search, advice, perspectives, guest expertise, episode insights",
   "type": "module",
   "main": "build/index.js",
   "bin": {
@@ -10,7 +10,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "build:knowledge": "npx tsx scripts/build-knowledge.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
@@ -19,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.7.0"
   }
 }

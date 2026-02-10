@@ -149,3 +149,68 @@ function timeToSeconds(time: string): number {
   if (parts.length === 2) return parts[0] * 60 + parts[1];
   return 0;
 }
+
+// --- 多词片段提取（供 BM25 搜索结果使用）---
+
+export function extractMatchSegments(
+  store: DataStore,
+  slug: string,
+  queryTerms: string[],
+  maxMatches: number = 5,
+  contextSegments: number = 1
+): TranscriptMatch[] {
+  const transcript = store.getTranscript(slug);
+  if (!transcript) return [];
+
+  const segments = parseTranscriptSegments(transcript);
+  const lowerTerms = queryTerms.map((t) => t.toLowerCase());
+  const matches: TranscriptMatch[] = [];
+
+  for (let i = 0; i < segments.length && matches.length < maxMatches; i++) {
+    const seg = segments[i];
+    const textLower = seg.text.toLowerCase();
+    const hitCount = lowerTerms.filter((t) => textLower.includes(t)).length;
+
+    if (hitCount === 0) continue;
+
+    const contextParts: string[] = [];
+    const start = Math.max(0, i - contextSegments);
+    const end = Math.min(segments.length - 1, i + contextSegments);
+    for (let j = start; j <= end; j++) {
+      const s = segments[j];
+      const prefix = j === i ? ">>> " : "    ";
+      contextParts.push(`${prefix}${s.speaker} (${s.timestamp}): ${s.text}`);
+    }
+
+    matches.push({
+      text: contextParts.join("\n"),
+      speaker: seg.speaker,
+      timestamp: seg.timestamp,
+      lineNumber: seg.lineNumber,
+    });
+  }
+
+  return matches;
+}
+
+// --- 首尾片段提取（供 episode_insights 降级使用）---
+
+export function extractOverviewSegments(
+  store: DataStore,
+  slug: string,
+  headCount: number = 3,
+  tailCount: number = 2
+): { intro: string; closing: string } {
+  const transcript = store.getTranscript(slug);
+  if (!transcript) return { intro: "", closing: "" };
+
+  const segments = parseTranscriptSegments(transcript);
+
+  const introSegs = segments.slice(0, headCount);
+  const closingSegs = segments.slice(-tailCount);
+
+  const format = (segs: ParsedSegment[]) =>
+    segs.map((s) => `${s.speaker} (${s.timestamp}): ${s.text}`).join("\n\n");
+
+  return { intro: format(introSegs), closing: format(closingSegs) };
+}
