@@ -48,13 +48,83 @@ npm run build
 
 ## 生成知识层（可选）
 
-知识层为每期节目预生成摘要、观点、框架、金句，可增强 `get_advice`、`get_episode_insights` 等工具的输出。
+知识层为每期节目预生成摘要、观点、框架、金句等结构化知识，可增强 `get_advice`、`get_episode_insights` 等工具的输出。
 
-生成方式：将 `prompts/build-knowledge.md` 的内容发送给已配置本 MCP 的 AI 工具（Claude Code、Codex、Gemini CLI 等），AI 会自动调用工具读取转录稿并生成结构化知识。
+**生成方式**：将 `prompts/build-knowledge.md` 的内容发送给已配置本 MCP 的 AI 工具（Claude Code、Codex、Gemini CLI 等），并在末尾附上一组 slug 列表。AI 会自动调用工具读取完整转录稿并生成结构化知识。
 
-- 每次对话处理 10 期，多次发送即可完成全部 303 期
 - 幂等：已处理的节目自动跳过
 - 输出文件：`data/knowledge.json`（本地生成，不提交到仓库）
+
+### 分组列表
+
+303 期节目分为 31 组，每次选择一组发送给 AI 处理：
+
+<details>
+<summary>点击展开全部分组</summary>
+
+**第 1 组**: `ada-chen-rekhi`, `adam-fishman`, `adam-grenier`, `adriel-frederick`, `aishwarya-naresh-reganti-kiriti-badam`, `albert-cheng`, `alex-hardimen`, `alex-komoroske`, `alexander-embiricos`, `alisa-cohn`
+
+**第 2 组**: `ami-vora`, `amjad-masad`, `andrew-wilkinson`, `andy-johns`, `andy-raskin`, `andy-raskin_`, `anneka-gupta`, `annie-duke`, `annie-pearl`, `anton-osika`
+
+**第 3 组**: `anuj-rathi`, `aparna-chennapragada`, `april-dunford`, `april-dunford-20`, `archie-abrams`, `arielle-jackson`, `asha-sharma`, `austin-hay`, `ayo-omojola`, `bangaly-kaba`
+
+**第 4 组**: `barbra-gago`, `ben-horowitz`, `ben-williams`, `benjamin-lauzier`, `benjamin-mann`, `bill-carr`, `bob-baxley`, `bob-moesta`, `bob-moesta-20`, `boz`
+
+**第 5 组**: `brandon-chu`, `brendan-foody`, `bret-taylor`, `brian-balfour`, `brian-chesky`, `brian-tolkin`, `cam-adams`, `camille-fournier`, `camille-hearst`, `camille-ricketts`
+
+**第 6 组**: `carilu-dietrich`, `carole-robin`, `casey-winters`, `casey-winters_`, `chandra-janakiraman`, `chip-conley`, `chip-huyen`, `chris-hutchins`, `christian-idiodi`, `christina-wodtke`
+
+**第 7 组**: `christine-itwaru`, `christopher-lochhead`, `christopher-miller`, `claire-butler`, `claire-hughes-johnson`, `claire-vo`, `crystal-w`, `dalton-caldwell`, `dan-hockenmaier`, `dan-shipper`
+
+**第 8 组**: `daniel-lereya`, `david-placek`, `david-singleton`, `deb-liu`, `dhanji-r-prasanna`, `dharmesh-shah`, `dmitry-zlokazov`, `donna-lichaw`, `dr-fei-fei-li`, `drew-houston`
+
+**第 9 组**: `dylan-field`, `dylan-field-20`, `ebi-atawodi`, `edwin-chen`, `eeke-de-milliano`, `elena-verna`, `elena-verna-20`, `elena-verna-30`, `elena-verna-40`, `eli-schwartz`
+
+**第 10 组**: `elizabeth-stone`, `emilie-gerber`, `emily-kramer`, `eoghan-mccabe`, `eoy-review`, `eric-ries`, `eric-simons`, `ethan-evans`, `ethan-evans-20`, `ethan-smith`
+
+**第 11 组**: `evan-lapointe`, `failure`, `fareed-mosavat`, `farhan-thawar`, `fei-fei`, `garrett-lord`, `gaurav-misra`, `geoff-charles`, `geoffrey-moore`, `gergely`
+
+**第 12 组**: `gia-laudi`, `gibson-biddle`, `gina-gotthilf`, `gokul-rajaram`, `graham-weaver`, `grant-lee`, `guillermo-rauch`, `gustaf-alstromer`, `gustav-söderström`, `hamel-husain-shreya-shankar`
+
+**第 13 组**: `hamelshreya`, `hamilton-helmer`, `hari-srinivasan`, `heidi-helfand`, `hila-qu`, `hilary-gridley`, `howie-liu`, `ian-mcallister`, `inbal-s`, `interview-q-compilation`
+
+**第 14 组**: `itamar-gilad`, `ivan-zhao`, `jackie-bavaro`, `jackson-shuttleworth`, `jag-duggal`, `jake-knapp-john-zeratsky`, `jake-knapp-john-zeratsky-20`, `janna-bastow`, `jason-droege`, `jason-feifer`
+
+**第 15 组**: `jason-fried`, `jason-m-lemkin`, `jason-shah`, `jeanne-grosser`, `jeff-weinstein`, `jeffrey-pfeffer`, `jen-abel`, `jen-abel-20`, `jeremy-henrickson`, `jerry-colonna`
+
+**第 16 组**: `jess-lachs`, `jessica-hische`, `jessica-livingston`, `jiaona-zhang`, `joe-hudson`, `john-cutler`, `john-mark-nickels`, `jonathan-becker`, `jonathan-lowenhar`, `jonny-miller`
+
+**第 17 组**: `josh-miller`, `judd-antin`, `jules-walter`, `julia-schottenstein`, `julian-shapiro`, `julie-zhuo`, `julie-zhuo-20`, `karina-nguyen`, `karri-saarinen`, `katie-dill`
+
+**第 18 组**: `kayvon-beykpour`, `keith-coleman-jay-baxter`, `keith-yandell`, `ken-norton`, `kenneth-berger`, `kevin-aluwi`, `kevin-weil`, `kevin-yien`, `kim-scott`, `kristen-berman`
+
+**第 19 组**: `krithika-shankarraman`, `kunal-shah`, `lane-shackleton`, `laura-modi`, `laura-schaffer`, `lauren-ipsen`, `lauryn-isford`, `logan-kilpatrick`, `luc-levesque`, `lulu-cheng-meservey`
+
+**第 20 组**: `madhavan-ramanujam`, `madhavan-ramanujam-20`, `maggie-crowley`, `manik-gupta`, `marc-benioff`, `marily-nika`, `marty-cagan`, `marty-cagan-20`, `matt-abrahams`, `matt-dixon`
+
+**第 21 组**: `matt-lemay`, `matt-macinnis`, `matt-mochary`, `matt-mullenweg`, `matthew-dicks`, `maya-prohovnik`, `mayur-kamat`, `megan-cook`, `melanie-perkins`, `melissa`
+
+**第 22 组**: `melissa-perri`, `melissa-perri-denise-tilles`, `melissa-tan`, `meltem-kuran`, `merci-grace`, `michael-truell`, `mihika-kapoor`, `mike-krieger`, `mike-maples-jr`, `molly-graham`
+
+**第 23 组**: `nabeel-s-qureshi`, `nan-yu`, `nancy-duarte`, `naomi-gleit`, `naomi-ionita`, `nick-turley`, `nickey-skarstad`, `nicole-forsgren`, `nicole-forsgren-20`, `nikhyl-singhal`
+
+**第 24 组**: `nikita-bier`, `nikita-miller`, `nilan-peiris`, `nir-eyal`, `noah-weiss`, `noam-lovinsky`, `oji-udezue`, `paige-costello`, `patrick-campbell`, `paul-adams`
+
+**第 25 组**: `paul-millerd`, `pete-kazanjy`, `peter-deng`, `petra-wille`, `phyl-terry`, `raaz-herzberg`, `rachel-lockett`, `rahul-vohra`, `ramesh-johari`, `ravi-mehta`
+
+**第 26 组**: `ray-cao`, `richard-rumelt`, `robby-stein`, `roger-martin`, `ronny-kohavi`, `ryan-hoover`, `ryan-j-salva`, `ryan-singer`, `sachin-monga`, `sahil-mansuri`
+
+**第 27 组**: `sam-schillace`, `sanchan-saxena`, `sander-schulhoff`, `sander-schulhoff-20`, `sarah-tavel`, `scott-belsky`, `scott-wu`, `sean-ellis`, `seth-godin`, `shaun-clowes`
+
+**第 28 组**: `shishir-mehrotra`, `shreyas-doshi`, `shreyas-doshi-live`, `shweta-shriva`, `sri-batchu`, `sriram-and-aarthi`, `stewart-butterfield`, `tamar-yehoshua`, `tanguy-crusson`, `teaser_2021`
+
+**第 29 组**: `teresa-torres`, `tim-holley`, `timothy-davis`, `tobi-lutke`, `todd-jackson`, `tom-conrad`, `tomer-cohen`, `tomer-cohen-20`, `tristan-de-montebello`, `upasna-gautam`
+
+**第 30 组**: `uri-levine`, `uri-levine-20`, `varun-mohan`, `varun-parmar`, `vijay`, `vikrama-dhiman`, `wes-kao`, `wes-kao-20`, `will-larson`, `yamashata`
+
+**第 31 组**: `yuhki-yamashata`, `yuriy-timen`, `zoelle-egner`
+
+</details>
 
 ## 配置
 

@@ -13,9 +13,13 @@ export interface Quote {
 export interface EpisodeKnowledge {
   slug: string;
   summary: string;
+  guestBackground: string;
   keyInsights: string[];
+  actionableAdvice: string[];
   frameworks: Framework[];
   quotes: Quote[];
+  topics: string[];
+  controversialTakes: string[];
 }
 
 export interface KnowledgeBase {

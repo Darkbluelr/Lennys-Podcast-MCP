@@ -451,11 +451,20 @@ async function main() {
 
       const knowledge = store.getEpisodeKnowledge(slug);
       if (knowledge) {
+        if (knowledge.guestBackground) {
+          lines.push(`\n**嘉宾**: ${knowledge.guestBackground}`);
+        }
         lines.push(`\n### 摘要\n${knowledge.summary}`);
         if (knowledge.keyInsights.length > 0) {
           lines.push(`\n### 核心观点`);
           for (const insight of knowledge.keyInsights) {
             lines.push(`- ${insight}`);
+          }
+        }
+        if (knowledge.actionableAdvice?.length > 0) {
+          lines.push(`\n### 可执行建议`);
+          for (const advice of knowledge.actionableAdvice) {
+            lines.push(`- ${advice}`);
           }
         }
         if (knowledge.frameworks.length > 0) {
@@ -464,11 +473,20 @@ async function main() {
             lines.push(`- **${f.name}**: ${f.description}`);
           }
         }
+        if (knowledge.controversialTakes?.length > 0) {
+          lines.push(`\n### 反直觉观点`);
+          for (const take of knowledge.controversialTakes) {
+            lines.push(`- ${take}`);
+          }
+        }
         if (knowledge.quotes.length > 0) {
           lines.push(`\n### 金句`);
           for (const q of knowledge.quotes) {
             lines.push(`> "${q.text}" — ${q.speaker}`);
           }
+        }
+        if (knowledge.topics?.length > 0) {
+          lines.push(`\n### 话题标签\n${knowledge.topics.join(", ")}`);
         }
       } else {
         lines.push(`\n### 描述\n${result.description}`);
