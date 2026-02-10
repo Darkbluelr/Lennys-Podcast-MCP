@@ -267,6 +267,9 @@ async function main() {
             `- **话题分类**: ${topics.length} 个`,
             `- **总播放量**: ${totalViews.toLocaleString()}`,
             `- **时间跨度**: ${earliest?.publish_date ?? "N/A"} ~ ${latest?.publish_date ?? "N/A"}`,
+            store.hasKnowledge()
+              ? `- **知识层**: 已生成 ${store.getKnowledgeStats().processed}/${store.getKnowledgeStats().total} 期`
+              : `- **知识层**: 未生成（参见 prompts/build-knowledge.md）`,
             ``,
             `### 最热门话题 (Top 10)`,
             ...topTopics.map((t) => `- ${t.topic} (${t.episodeSlugs.length} 期)`),
@@ -301,6 +304,10 @@ async function main() {
           `### ${i + 1}. ${s.guest} — ${s.episodeTitle}`,
           `slug: ${s.slug}`,
         ];
+        const knowledge = store.getEpisodeKnowledge(s.slug);
+        if (knowledge?.keyInsights?.[0]) {
+          lines.push(`\n**核心观点**: ${knowledge.keyInsights[0]}`);
+        }
         lines.push(`\n**相关讨论片段**:`);
         for (const seg of s.segments) {
           lines.push(seg);
@@ -339,6 +346,10 @@ async function main() {
           `### ${i + 1}. ${p.guest}`,
           `节目: ${p.episodeTitle} (${p.slug})`,
         ];
+        const knowledge = store.getEpisodeKnowledge(p.slug);
+        if (knowledge?.keyInsights?.[0]) {
+          lines.push(`\n**核心观点**: ${knowledge.keyInsights[0]}`);
+        }
         lines.push(`\n**相关发言**:`);
         for (const v of p.viewpoints) {
           lines.push(v);
@@ -412,7 +423,7 @@ async function main() {
   // Tool 10: get_episode_insights — 节目深度洞察
   server.tool(
     "get_episode_insights",
-    "获取指定节目的概览信息：元数据、描述、开场和结尾片段。用于快速了解一期节目的内容。",
+    "获取指定节目的洞察：如有知识层则返回摘要、观点、框架、金句；否则返回描述和首尾片段概览。",
     {
       slug: z.string().describe("节目 slug，如 'brian-chesky'、'shreyas-doshi'"),
     },
@@ -436,10 +447,34 @@ async function main() {
       const lines = [
         `## ${result.guest} — ${result.title}`,
         `发布: ${result.date} | 话题: ${result.keywords.join(", ")}`,
-        `\n### 描述\n${result.description}`,
-        `\n### 开场片段\n${result.intro}`,
-        `\n### 结尾片段\n${result.closing}`,
       ];
+
+      const knowledge = store.getEpisodeKnowledge(slug);
+      if (knowledge) {
+        lines.push(`\n### 摘要\n${knowledge.summary}`);
+        if (knowledge.keyInsights.length > 0) {
+          lines.push(`\n### 核心观点`);
+          for (const insight of knowledge.keyInsights) {
+            lines.push(`- ${insight}`);
+          }
+        }
+        if (knowledge.frameworks.length > 0) {
+          lines.push(`\n### 框架与方法论`);
+          for (const f of knowledge.frameworks) {
+            lines.push(`- **${f.name}**: ${f.description}`);
+          }
+        }
+        if (knowledge.quotes.length > 0) {
+          lines.push(`\n### 金句`);
+          for (const q of knowledge.quotes) {
+            lines.push(`> "${q.text}" — ${q.speaker}`);
+          }
+        }
+      } else {
+        lines.push(`\n### 描述\n${result.description}`);
+        lines.push(`\n### 开场片段\n${result.intro}`);
+        lines.push(`\n### 结尾片段\n${result.closing}`);
+      }
 
       return {
         content: [{ type: "text", text: lines.join("\n") }],

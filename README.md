@@ -22,11 +22,12 @@
 | `get_advice` | 描述情境/挑战，获取多位嘉宾的相关建议和观点 |
 | `compare_perspectives` | 对比多位嘉宾在同一话题上的不同观点 |
 | `get_guest_expertise` | 获取嘉宾专长档案：节目、领域、主题、关键词 |
-| `get_episode_insights` | 获取节目概览：描述、开场和结尾片段 |
+| `get_episode_insights` | 获取节目洞察：有知识层时返回摘要/观点/框架/金句，否则返回概览 |
 
 ### 技术特性
 
 - **BM25 搜索引擎**：替代精确匹配，支持多词查询、字段加权（标题 8x > 嘉宾 6x > 关键词 5x > 描述 3x > 转录稿 1x）
+- **知识层（可选）**：通过 AI 提示词生成每期节目的摘要、观点、框架、金句，增强工具输出
 - 纯内存索引，启动时构建，无需外部数据库
 
 ## 前置条件
@@ -44,6 +45,16 @@ cd Lennys-Podcast-MCP
 npm install
 npm run build
 ```
+
+## 生成知识层（可选）
+
+知识层为每期节目预生成摘要、观点、框架、金句，可增强 `get_advice`、`get_episode_insights` 等工具的输出。
+
+生成方式：将 `prompts/build-knowledge.md` 的内容发送给已配置本 MCP 的 AI 工具（Claude Code、Codex、Gemini CLI 等），AI 会自动调用工具读取转录稿并生成结构化知识。
+
+- 每次对话处理 10 期，多次发送即可完成全部 303 期
+- 幂等：已处理的节目自动跳过
+- 输出文件：`data/knowledge.json`（本地生成，不提交到仓库）
 
 ## 配置
 
@@ -107,6 +118,21 @@ args = ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
 }
 ```
 
+### Gemini CLI
+
+编辑 `~/.gemini/settings.json`，添加 `mcpServers` 字段：
+
+```json
+{
+  "mcpServers": {
+    "lennys-podcast": {
+      "command": "node",
+      "args": ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
+    }
+  }
+}
+```
+
 > 所有配置中的 `/你的路径/` 替换为实际的绝对路径。不再需要设置 `LENNYS_REPO_ROOT` 环境变量。
 
 ## 项目结构
@@ -120,12 +146,17 @@ args = ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
 ├── src/                # MCP Server 源码
 │   ├── index.ts        # 入口 + 10 个工具注册
 │   ├── bm25.ts         # BM25 搜索引擎
-│   ├── data.ts         # 数据加载
+│   ├── data.ts         # 数据加载 + 知识层
 │   ├── search.ts       # 片段提取
 │   ├── advice.ts       # get_advice 逻辑
 │   ├── perspectives.ts # compare_perspectives 逻辑
 │   ├── insights.ts     # guest_expertise + episode_insights 逻辑
+│   ├── knowledge-types.ts # 知识层类型
 │   └── types.ts        # 核心类型
+├── prompts/
+│   └── build-knowledge.md  # 知识层生成提示词
+└── data/
+    └── knowledge.json  # AI 生成的知识（可选，本地生成）
 ```
 
 ## 使用示例

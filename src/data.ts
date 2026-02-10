@@ -2,12 +2,14 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import matter from "gray-matter";
 import type { EpisodeMeta, Episode, TopicIndex } from "./types.js";
+import type { KnowledgeBase, EpisodeKnowledge } from "./knowledge-types.js";
 
 export class DataStore {
   private episodes: Map<string, EpisodeMeta> = new Map();
   private transcripts: Map<string, string> = new Map();
   private topics: Map<string, TopicIndex> = new Map();
   private guestIndex: Map<string, string[]> = new Map();
+  private knowledge: KnowledgeBase | null = null;
   private ready = false;
 
   constructor(private repoRoot: string) {}
@@ -16,6 +18,7 @@ export class DataStore {
     this.loadEpisodes();
     this.loadTopics();
     this.buildGuestIndex();
+    this.loadKnowledge();
     this.ready = true;
   }
 
@@ -131,5 +134,31 @@ export class DataStore {
 
   getTranscriptEntries(): IterableIterator<[string, string]> {
     return this.transcripts.entries();
+  }
+
+  private loadKnowledge(): void {
+    const knowledgePath = join(this.repoRoot, "data", "knowledge.json");
+    if (!existsSync(knowledgePath)) return;
+    try {
+      const raw = readFileSync(knowledgePath, "utf-8");
+      this.knowledge = JSON.parse(raw) as KnowledgeBase;
+    } catch {
+      // 解析失败则跳过
+    }
+  }
+
+  hasKnowledge(): boolean {
+    return this.knowledge !== null && Object.keys(this.knowledge.episodes).length > 0;
+  }
+
+  getEpisodeKnowledge(slug: string): EpisodeKnowledge | undefined {
+    return this.knowledge?.episodes[slug];
+  }
+
+  getKnowledgeStats(): { total: number; processed: number } {
+    return {
+      total: this.episodes.size,
+      processed: this.knowledge ? Object.keys(this.knowledge.episodes).length : 0,
+    };
   }
 }
