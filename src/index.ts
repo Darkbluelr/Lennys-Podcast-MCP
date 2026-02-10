@@ -267,7 +267,6 @@ async function main() {
             `- **话题分类**: ${topics.length} 个`,
             `- **总播放量**: ${totalViews.toLocaleString()}`,
             `- **时间跨度**: ${earliest?.publish_date ?? "N/A"} ~ ${latest?.publish_date ?? "N/A"}`,
-            `- **知识层**: ${store.hasKnowledge() ? "已加载" : "未构建（使用 npm run build:knowledge 生成）"}`,
             ``,
             `### 最热门话题 (Top 10)`,
             ...topTopics.map((t) => `- ${t.topic} (${t.episodeSlugs.length} 期)`),
@@ -302,9 +301,6 @@ async function main() {
           `### ${i + 1}. ${s.guest} — ${s.episodeTitle}`,
           `slug: ${s.slug}`,
         ];
-        if (s.insight) {
-          lines.push(`\n**核心观点**: ${s.insight}`);
-        }
         lines.push(`\n**相关讨论片段**:`);
         for (const seg of s.segments) {
           lines.push(seg);
@@ -312,14 +308,10 @@ async function main() {
         return lines.join("\n");
       });
 
-      const footer = result.hasKnowledge
-        ? ""
-        : "\n\n---\n*提示: 运行 `npm run build:knowledge` 构建知识层可获得更丰富的预计算观点。*";
-
       return {
         content: [{
           type: "text",
-          text: `## 来自 Lenny's Podcast 嘉宾的建议\n\n**情境**: ${situation}\n\n共找到 ${result.sources.length} 位专家的相关观点\n\n${sections.join("\n\n---\n\n")}${footer}`,
+          text: `## 来自 Lenny's Podcast 嘉宾的建议\n\n**情境**: ${situation}\n\n共找到 ${result.sources.length} 位专家的相关观点\n\n${sections.join("\n\n---\n\n")}`,
         }],
       };
     }
@@ -347,9 +339,6 @@ async function main() {
           `### ${i + 1}. ${p.guest}`,
           `节目: ${p.episodeTitle} (${p.slug})`,
         ];
-        if (p.insight) {
-          lines.push(`\n**核心观点**: ${p.insight}`);
-        }
         lines.push(`\n**相关发言**:`);
         for (const v of p.viewpoints) {
           lines.push(v);
@@ -357,14 +346,10 @@ async function main() {
         return lines.join("\n");
       });
 
-      const footer = result.hasKnowledge
-        ? ""
-        : "\n\n---\n*提示: 构建知识层后可获得更精准的观点提取和对比。*";
-
       return {
         content: [{
           type: "text",
-          text: `## 多视角对比: "${topic}"\n\n共 ${result.guestCount} 位嘉宾的观点\n\n${sections.join("\n\n---\n\n")}${footer}`,
+          text: `## 多视角对比: "${topic}"\n\n共 ${result.guestCount} 位嘉宾的观点\n\n${sections.join("\n\n---\n\n")}`,
         }],
       };
     }
@@ -401,21 +386,10 @@ async function main() {
         `**出现节目**: ${result.episodes.length} 期`,
       ];
 
-      if (result.bio) {
-        lines.push(`**简介**: ${result.bio}`);
-      }
-
       if (result.expertiseAreas.length > 0) {
         lines.push(`\n### 专长领域`);
         for (const area of result.expertiseAreas) {
           lines.push(`- ${area}`);
-        }
-      }
-
-      if (result.keyThemes && result.keyThemes.length > 0) {
-        lines.push(`\n### 核心主题`);
-        for (const theme of result.keyThemes) {
-          lines.push(`- ${theme}`);
         }
       }
 
@@ -438,7 +412,7 @@ async function main() {
   // Tool 10: get_episode_insights — 节目深度洞察
   server.tool(
     "get_episode_insights",
-    "获取指定节目的深度洞察：摘要、核心观点、框架方法论、金句。如已构建知识层则返回预计算的结构化知识，否则返回基于 metadata 和首尾片段的概览。",
+    "获取指定节目的概览信息：元数据、描述、开场和结尾片段。用于快速了解一期节目的内容。",
     {
       slug: z.string().describe("节目 slug，如 'brian-chesky'、'shreyas-doshi'"),
     },
@@ -462,40 +436,10 @@ async function main() {
       const lines = [
         `## ${result.guest} — ${result.title}`,
         `发布: ${result.date} | 话题: ${result.keywords.join(", ")}`,
+        `\n### 描述\n${result.description}`,
+        `\n### 开场片段\n${result.intro}`,
+        `\n### 结尾片段\n${result.closing}`,
       ];
-
-      if (result.summary) {
-        lines.push(`\n### 摘要\n${result.summary}`);
-      }
-
-      if (result.keyInsights && result.keyInsights.length > 0) {
-        lines.push(`\n### 核心观点`);
-        for (const insight of result.keyInsights) {
-          lines.push(`- ${insight}`);
-        }
-      }
-
-      if (result.frameworks && result.frameworks.length > 0) {
-        lines.push(`\n### 框架与方法论`);
-        for (const f of result.frameworks) {
-          lines.push(`- **${f.name}**: ${f.description}`);
-        }
-      }
-
-      if (result.quotes && result.quotes.length > 0) {
-        lines.push(`\n### 金句`);
-        for (const q of result.quotes) {
-          lines.push(`> "${q.text}" — ${q.speaker}`);
-        }
-      }
-
-      if (result.overview) {
-        lines.push(`\n### 节目概览`);
-        lines.push(`**描述**: ${result.overview.description}`);
-        lines.push(`\n**开场片段**:\n${result.overview.intro}`);
-        lines.push(`\n**结尾片段**:\n${result.overview.closing}`);
-        lines.push(`\n---\n*提示: 运行 \`npm run build:knowledge\` 构建知识层可获得完整的摘要、观点和框架提取。*`);
-      }
 
       return {
         content: [{ type: "text", text: lines.join("\n") }],

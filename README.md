@@ -22,13 +22,12 @@
 | `get_advice` | 描述情境/挑战，获取多位嘉宾的相关建议和观点 |
 | `compare_perspectives` | 对比多位嘉宾在同一话题上的不同观点 |
 | `get_guest_expertise` | 获取嘉宾专长档案：节目、领域、主题、关键词 |
-| `get_episode_insights` | 获取节目深度洞察：摘要、观点、框架、金句 |
+| `get_episode_insights` | 获取节目概览：描述、开场和结尾片段 |
 
 ### 技术特性
 
 - **BM25 搜索引擎**：替代精确匹配，支持多词查询、字段加权（标题 8x > 嘉宾 6x > 关键词 5x > 描述 3x > 转录稿 1x）
-- **知识层（可选）**：通过 Claude API 预计算每期节目的摘要、观点、框架、金句，增强工具输出质量
-- **优雅降级**：无知识层时所有工具仍可正常工作，有知识层时输出更丰富
+- 纯内存索引，启动时构建，无需外部数据库
 
 ## 前置条件
 
@@ -45,22 +44,6 @@ cd Lennys-Podcast-MCP
 npm install
 npm run build
 ```
-
-## 构建知识层（可选）
-
-知识层通过 Claude API 为每期节目生成结构化知识，可显著提升 `get_advice`、`get_episode_insights` 等工具的输出质量。
-
-```bash
-# 设置 API 密钥并运行
-ANTHROPIC_API_KEY=sk-... npm run build:knowledge
-
-# 可选参数
-BATCH_SIZE=5 MAX_EPISODES=10 ANTHROPIC_API_KEY=sk-... npm run build:knowledge
-```
-
-- 脚本幂等：已处理的节目会自动跳过
-- 每批次自动保存，中断后可继续
-- 输出文件：`data/knowledge.json`
 
 ## 配置
 
@@ -137,17 +120,12 @@ args = ["/你的路径/Lennys-Podcast-MCP/build/index.js"]
 ├── src/                # MCP Server 源码
 │   ├── index.ts        # 入口 + 10 个工具注册
 │   ├── bm25.ts         # BM25 搜索引擎
-│   ├── data.ts         # 数据加载 + 知识层
+│   ├── data.ts         # 数据加载
 │   ├── search.ts       # 片段提取
 │   ├── advice.ts       # get_advice 逻辑
 │   ├── perspectives.ts # compare_perspectives 逻辑
 │   ├── insights.ts     # guest_expertise + episode_insights 逻辑
-│   ├── knowledge-types.ts # 知识层类型
 │   └── types.ts        # 核心类型
-├── scripts/
-│   └── build-knowledge.ts  # 知识层构建脚本
-└── data/
-    └── knowledge.json  # 预计算知识（可选，需构建）
 ```
 
 ## 使用示例
@@ -170,9 +148,6 @@ npm run dev
 
 # 手动构建
 npm run build
-
-# 构建知识层
-ANTHROPIC_API_KEY=sk-... npm run build:knowledge
 
 # 启动（通常由 AI 工具自动启动，无需手动运行）
 npm start

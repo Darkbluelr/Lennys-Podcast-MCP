@@ -9,15 +9,13 @@ export interface GuestPerspective {
   guest: string;
   slug: string;
   episodeTitle: string;
-  viewpoints: string[];  // 该嘉宾在此话题上的发言片段
-  insight?: string;
+  viewpoints: string[];
 }
 
 export interface PerspectivesResult {
   topic: string;
   perspectives: GuestPerspective[];
   guestCount: number;
-  hasKnowledge: boolean;
 }
 
 export function comparePerspectives(
@@ -47,25 +45,17 @@ export function comparePerspectives(
     const matches = extractMatchSegments(store, r.slug, queryTerms, 3, 0);
     if (matches.length === 0) continue;
 
-    const perspective: GuestPerspective = {
+    guestMap.set(guestKey, {
       guest: meta.guest,
       slug: r.slug,
       episodeTitle: meta.title,
       viewpoints: matches.map((m) => m.text),
-    };
-
-    const knowledge = store.getEpisodeKnowledge(r.slug);
-    if (knowledge && knowledge.keyInsights.length > 0) {
-      perspective.insight = knowledge.keyInsights.join(" | ");
-    }
-
-    guestMap.set(guestKey, perspective);
+    });
   }
 
   return {
     topic,
     perspectives: Array.from(guestMap.values()),
     guestCount: guestMap.size,
-    hasKnowledge: store.hasKnowledge(),
   };
 }

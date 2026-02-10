@@ -10,8 +10,6 @@ export interface GuestExpertise {
   episodes: { slug: string; title: string; date: string }[];
   expertiseAreas: string[];
   topKeywords: string[];
-  bio?: string;
-  keyThemes?: string[];
 }
 
 export function getGuestExpertise(
@@ -35,12 +33,12 @@ export function getGuestExpertise(
     .slice(0, 15)
     .map(([kw]) => kw);
 
-  // 从 description 提取专长领域（取前 3 期的描述关键信息）
+  // 从 description 提取专长领域
   const expertiseAreas = extractExpertiseFromDescriptions(
     episodes.map((e) => e.description)
   );
 
-  const result: GuestExpertise = {
+  return {
     name,
     episodes: episodes.map((e) => ({
       slug: e.slug,
@@ -50,22 +48,9 @@ export function getGuestExpertise(
     expertiseAreas,
     topKeywords,
   };
-
-  // 如有知识层，附加完整档案
-  const profile = store.getGuestProfile(guestQuery);
-  if (profile) {
-    result.bio = profile.bio;
-    result.keyThemes = profile.keyThemes;
-    if (profile.expertiseAreas.length > 0) {
-      result.expertiseAreas = profile.expertiseAreas;
-    }
-  }
-
-  return result;
 }
 
 function extractExpertiseFromDescriptions(descriptions: string[]): string[] {
-  // 从描述中提取高频有意义的短语
   const phrases = new Map<string, number>();
   const stopPhrases = new Set([
     "lenny's podcast", "this episode", "in this", "we discuss",
@@ -73,7 +58,6 @@ function extractExpertiseFromDescriptions(descriptions: string[]): string[] {
   ]);
 
   for (const desc of descriptions) {
-    // 提取引号内的短语和关键名词短语
     const quoted = desc.match(/"([^"]+)"/g);
     if (quoted) {
       for (const q of quoted) {
@@ -84,7 +68,6 @@ function extractExpertiseFromDescriptions(descriptions: string[]): string[] {
       }
     }
 
-    // 提取 "about X" / "on X" 模式
     const aboutMatches = desc.match(/(?:about|on|discusses?|explores?)\s+([^,.!?]+)/gi);
     if (aboutMatches) {
       for (const m of aboutMatches) {
@@ -110,12 +93,9 @@ export interface EpisodeInsights {
   title: string;
   date: string;
   keywords: string[];
-  summary?: string;
-  keyInsights?: string[];
-  frameworks?: { name: string; description: string }[];
-  quotes?: { text: string; speaker: string }[];
-  // 降级模式：无知识层时从 metadata + 首尾片段生成
-  overview?: { description: string; intro: string; closing: string };
+  description: string;
+  intro: string;
+  closing: string;
 }
 
 export function getEpisodeInsights(
@@ -125,37 +105,16 @@ export function getEpisodeInsights(
   const meta = store.getEpisode(slug);
   if (!meta) return null;
 
-  const result: EpisodeInsights = {
+  const { intro, closing } = extractOverviewSegments(store, slug, 4, 3);
+
+  return {
     slug,
     guest: meta.guest,
     title: meta.title,
     date: meta.publish_date,
     keywords: meta.keywords,
-  };
-
-  // 优先使用知识层
-  const knowledge = store.getEpisodeKnowledge(slug);
-  if (knowledge) {
-    result.summary = knowledge.summary;
-    result.keyInsights = knowledge.keyInsights;
-    result.frameworks = knowledge.frameworks.map((f) => ({
-      name: f.name,
-      description: f.description,
-    }));
-    result.quotes = knowledge.quotes.map((q) => ({
-      text: q.text,
-      speaker: q.speaker,
-    }));
-    return result;
-  }
-
-  // 降级：从 metadata + 首尾片段生成概览
-  const { intro, closing } = extractOverviewSegments(store, slug, 4, 3);
-  result.overview = {
     description: meta.description,
     intro,
     closing,
   };
-
-  return result;
 }

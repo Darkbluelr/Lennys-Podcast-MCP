@@ -10,12 +10,10 @@ export interface AdviceSource {
   episodeTitle: string;
   slug: string;
   segments: string[];
-  insight?: string; // 来自知识层的预计算观点
 }
 
 export interface AdviceResult {
   sources: AdviceSource[];
-  hasKnowledge: boolean;
 }
 
 export function getAdvice(
@@ -41,21 +39,13 @@ export function getAdvice(
     const matches = extractMatchSegments(store, r.slug, queryTerms, 3, 1);
     if (matches.length === 0) continue;
 
-    const source: AdviceSource = {
+    sources.push({
       guest: meta.guest,
       episodeTitle: meta.title,
       slug: r.slug,
       segments: matches.map((m) => m.text),
-    };
-
-    // 如有知识层，附加预计算观点
-    const knowledge = store.getEpisodeKnowledge(r.slug);
-    if (knowledge && knowledge.keyInsights.length > 0) {
-      source.insight = knowledge.keyInsights.join(" | ");
-    }
-
-    sources.push(source);
+    });
   }
 
-  return { sources, hasKnowledge: store.hasKnowledge() };
+  return { sources };
 }

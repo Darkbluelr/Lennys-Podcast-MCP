@@ -2,14 +2,12 @@ import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 import matter from "gray-matter";
 import type { EpisodeMeta, Episode, TopicIndex } from "./types.js";
-import type { KnowledgeBase, EpisodeKnowledge, GuestProfile } from "./knowledge-types.js";
 
 export class DataStore {
   private episodes: Map<string, EpisodeMeta> = new Map();
   private transcripts: Map<string, string> = new Map();
   private topics: Map<string, TopicIndex> = new Map();
   private guestIndex: Map<string, string[]> = new Map();
-  private knowledge: KnowledgeBase | null = null;
   private ready = false;
 
   constructor(private repoRoot: string) {}
@@ -18,7 +16,6 @@ export class DataStore {
     this.loadEpisodes();
     this.loadTopics();
     this.buildGuestIndex();
-    this.loadKnowledge();
     this.ready = true;
   }
 
@@ -134,39 +131,5 @@ export class DataStore {
 
   getTranscriptEntries(): IterableIterator<[string, string]> {
     return this.transcripts.entries();
-  }
-
-  // --- 知识层（可选，优雅降级）---
-
-  private loadKnowledge(): void {
-    const knowledgePath = join(this.repoRoot, "data", "knowledge.json");
-    if (!existsSync(knowledgePath)) return;
-    try {
-      const raw = readFileSync(knowledgePath, "utf-8");
-      this.knowledge = JSON.parse(raw) as KnowledgeBase;
-    } catch {
-      // 解析失败则跳过，不影响核心功能
-    }
-  }
-
-  hasKnowledge(): boolean {
-    return this.knowledge !== null;
-  }
-
-  getEpisodeKnowledge(slug: string): EpisodeKnowledge | undefined {
-    return this.knowledge?.episodes[slug];
-  }
-
-  getGuestProfile(name: string): GuestProfile | undefined {
-    if (!this.knowledge) return undefined;
-    const lower = name.toLowerCase();
-    return Object.values(this.knowledge.guests).find(
-      (g) => g.name.toLowerCase().includes(lower)
-    );
-  }
-
-  getAllGuestProfiles(): GuestProfile[] {
-    if (!this.knowledge) return [];
-    return Object.values(this.knowledge.guests);
   }
 }
