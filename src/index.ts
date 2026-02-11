@@ -268,8 +268,8 @@ async function main() {
             `- **总播放量**: ${totalViews.toLocaleString()}`,
             `- **时间跨度**: ${earliest?.publish_date ?? "N/A"} ~ ${latest?.publish_date ?? "N/A"}`,
             store.hasKnowledge()
-              ? `- **知识层**: 已生成 ${store.getKnowledgeStats().processed}/${store.getKnowledgeStats().total} 期`
-              : `- **知识层**: 未生成（参见 prompts/build-knowledge.md）`,
+              ? `- **知识层**: ${store.getKnowledgeStats().processed}/${store.getKnowledgeStats().total} 期已收录`
+              : `- **知识层**: 未加载`,
             ``,
             `### 最热门话题 (Top 10)`,
             ...topTopics.map((t) => `- ${t.topic} (${t.episodeSlugs.length} 期)`),
